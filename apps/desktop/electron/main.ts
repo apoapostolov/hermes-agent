@@ -137,6 +137,7 @@ import {
   normalizeConnectionInput,
   normalizeRegistry,
   parseBackendScopeKey,
+  parseRemoteProfileListing,
   reconcileAppliedGlobalConnection,
   reconcileRegistryDrift,
   registrySourceOwnsPrimaryBackend,
@@ -433,6 +434,7 @@ import {
   connectWindowsRemote,
   detectRemotePlatform,
   helper,
+  powerShellCommand,
   probeWindowsRemote,
   terminateOwnedWindowsDashboardForUpdate
 } from './windows-remote-lifecycle'
@@ -15427,6 +15429,17 @@ async function probeConnectionInstallId(connectionId: string, descriptor: any): 
   }
 }
 
+async function listWindowsSshProfiles(ssh, hermesHome) {
+  const script = [
+    '$ErrorActionPreference="Stop"',
+    `$hermesHomePath=${JSON.stringify(String(hermesHome || ''))}`,
+    '$profiles=Join-Path $hermesHomePath "profiles"',
+    'if(Test-Path -LiteralPath $profiles -PathType Container){Get-ChildItem -LiteralPath $profiles -Directory -Force | ForEach-Object { $_.Name }}'
+  ].join(';')
+
+  return ssh.exec(powerShellCommand(script))
+}
+
 async function probeSshProfileInventory(connection) {
   if (
     !shouldRetrySshInventory(
@@ -15461,7 +15474,12 @@ async function probeSshProfileInventory(connection) {
 
   try {
     await ssh.open()
-    const profiles = await remoteLifecycle.listRemoteHermesProfiles(ssh)
+    const platform: any = await detectRemotePlatform(ssh, sshConfig.remoteHermesPath || '')
+    const listing =
+      platform.os === 'Windows'
+        ? await listWindowsSshProfiles(ssh, platform.hermesHome)
+        : await remoteLifecycle.listRemoteHermesProfiles(ssh)
+    const profiles = parseRemoteProfileListing(listing)
 
     if (profiles.length > 0) {
       sshRosterCache.set(connection.id, profiles)
