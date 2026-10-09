@@ -1,6 +1,6 @@
 name: provider-status
 repo: https://github.com/apoapostolov/hermes-agent-awesome-plugins
-sha: 953732a9fb52b6fd89e73fc96d910aab63163e07
+sha: 74749cef1de9377002924e9986739917431c5cf7
 subdir: public/provider-status
 description: >-
   Status-bar quota tracking for 17 providers: Tavily, OpenCode Go, DeepSeek,
@@ -14,8 +14,8 @@ maintainer: apoapostolov
 tier: community
 category: desktop
 docs_url: https://github.com/apoapostolov/hermes-agent-awesome-plugins/tree/main/public/provider-status
-version: "1.5.12"
-image: https://raw.githubusercontent.com/apoapostolov/hermes-agent-awesome-plugins/953732a9fb52b6fd89e73fc96d910aab63163e07/public/provider-status/docs/hero.png
+version: "1.5.14"
+image: https://raw.githubusercontent.com/apoapostolov/hermes-agent-awesome-plugins/74749cef1de9377002924e9986739917431c5cf7/public/provider-status/docs/hero.png
 platforms: []
 capabilities:
   provides_tools: []
