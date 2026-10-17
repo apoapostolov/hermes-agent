@@ -1,6 +1,6 @@
 name: opaque-composer
 repo: https://github.com/apoapostolov/hermes-agent-awesome-plugins
-sha: 953732a9fb52b6fd89e73fc96d910aab63163e07
+sha: 47d12c8c4e1f4b1e2200a3efbf7678f279636568
 subdir: public/opaque-composer
 description: "Keep the desktop composer solid while scrolling so conversation text stays readable."
 maintainer: apoapostolov
@@ -8,7 +8,7 @@ tier: community
 category: desktop
 docs_url: https://github.com/apoapostolov/hermes-agent-awesome-plugins/tree/main/public/opaque-composer
 version: "1.0.0"
-image: https://raw.githubusercontent.com/apoapostolov/hermes-agent-awesome-plugins/953732a9fb52b6fd89e73fc96d910aab63163e07/public/opaque-composer/docs/hero.png
+image: https://raw.githubusercontent.com/apoapostolov/hermes-agent-awesome-plugins/47d12c8c4e1f4b1e2200a3efbf7678f279636568/public/opaque-composer/docs/hero.png
 platforms: []
 capabilities:
   provides_tools: []
