@@ -1,0 +1,30 @@
+name: reddit
+repo: https://github.com/apoapostolov/hermes-agent-awesome-plugins
+sha: f19e30a438b5886cc90de94665f845adf48fca26
+subdir: public/reddit
+description: "Reddit with your own account behind it: bring your own Reddit API app, log in once with the authorization-code flow and a loopback catcher, then read listings, search, threads and the inbox, or post, comment, vote, save, subscribe and run any other endpoint through reddit_api. Reads use the account token, so private subreddits, saved items, moderation queues and modmail work. Disclosure — calls www.reddit.com for the OAuth token endpoints and oauth.reddit.com for the API, only with the app and account the user authorizes; stores the client id, client secret, redirect uri and the permanent refresh token in $HERMES_HOME/reddit-config.json and $HERMES_HOME/reddit-oauth.json, never reads .env or another profile's environment, and sends no telemetry."
+maintainer: apoapostolov
+tier: community
+category: web
+docs_url: https://github.com/apoapostolov/hermes-agent-awesome-plugins/tree/main/public/reddit
+version: "1.0.0"
+image: https://raw.githubusercontent.com/apoapostolov/hermes-agent-awesome-plugins/f19e30a438b5886cc90de94665f845adf48fca26/public/reddit/docs/hero.png
+platforms: []
+capabilities:
+  provides_tools:
+    - reddit_setup
+    - reddit_login
+    - reddit_status
+    - reddit_api
+    - reddit_subreddit
+    - reddit_search
+    - reddit_thread
+    - reddit_submit
+    - reddit_comment
+    - reddit_vote
+    - reddit_manage
+    - reddit_inbox
+  provides_hooks: []
+  provides_middleware: []
+  requires_env: []
+requires_hermes: ">=0.21.0"
