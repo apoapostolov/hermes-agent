@@ -8,7 +8,7 @@ category: tools
 requires_hermes: ">=0.21"
 version: "0.1.0"
 docs_url: https://github.com/petertaras/hermes-rtk-rewrite-with-docker-support#readme
-platforms: [linux, macos]
+platforms: [linux, macos, windows]
 capabilities:
   provides_tools: []
   provides_hooks:
