@@ -55,6 +55,8 @@ export interface PluginSettingsPage {
   order?: number
   /** The page's landing content. */
   render: () => ReactNode
+  /** Hide the automatic agent `config_schema` form when this page owns those settings. */
+  hideAgentSettings?: boolean
   /** Sub-pages listed beneath the entry when it is selected. */
   children?: PluginSettingsSubpage[]
 }
@@ -138,7 +140,7 @@ export function pluginSettingsNavId(entry: PluginSettingsEntry, child?: PluginSe
 export function settingsPageContribution(page: PluginSettingsPage): Omit<Contribution, 'source'> {
   return {
     area: SETTINGS_PLUGINS_AREA,
-    data: { children: page.children ?? [], icon: page.icon },
+    data: { children: page.children ?? [], hideAgentSettings: page.hideAgentSettings === true, icon: page.icon },
     id: page.id,
     order: page.order,
     render: page.render,
@@ -234,7 +236,10 @@ export function pluginSettingsEntries({
     })
 
     if (owner) {
-      if (!owner.children.some(child => child.agentKey)) {
+      const ownerData = contributions.find(contribution => contribution.id === owner.id)?.data
+      const hideAgentSettings = isRecord(ownerData) && ownerData.hideAgentSettings === true
+
+      if (!hideAgentSettings && !owner.children.some(child => child.agentKey)) {
         owner.children.push({ agentKey: row.key, id: row.key, title: configTitle })
       }
 

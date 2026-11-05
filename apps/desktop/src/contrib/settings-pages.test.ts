@@ -49,6 +49,7 @@ describe('ctx.registerSettingsPage', () => {
 
     ctx.registerSettingsPage({
       children: [{ id: 'units', render, title: 'Units' }],
+      hideAgentSettings: true,
       icon: 'cloud',
       id: 'main',
       render,
@@ -58,7 +59,7 @@ describe('ctx.registerSettingsPage', () => {
     const [registered] = registry.getArea(SETTINGS_PLUGINS_AREA).filter(c => c.source === 'plugin:weather')
 
     expect(registered).toMatchObject({ id: 'weather:main', source: 'plugin:weather', title: 'Weather' })
-    expect(registered?.data).toMatchObject({ children: [{ id: 'units', title: 'Units' }], icon: 'cloud' })
+    expect(registered?.data).toMatchObject({ children: [{ id: 'units', title: 'Units' }], hideAgentSettings: true, icon: 'cloud' })
 
     // The loader's disable/unload runs every tracked disposer.
     disposers.splice(0).forEach(dispose => dispose())
@@ -137,6 +138,19 @@ describe('pluginSettingsEntries', () => {
 
     expect(entries).toHaveLength(1)
     expect(entries[0]?.children).toEqual([{ agentKey: 'pixel_overlay', id: 'pixel_overlay', title: 'Agent settings' }])
+  })
+
+  it('omits the automatic schema sub-page when the desktop page owns its settings', () => {
+    const entries = pluginSettingsEntries({
+      configTitle: 'Agent settings',
+      contributions: [page('voice-gate:settings', 'Voice Gate', { data: { hideAgentSettings: true } })],
+      packageOf: pluginId => (pluginId === 'voice-gate' ? 'voice-gate' : null),
+      rows: [row({ key: 'voice-gate', name: 'voice-gate', settings_schema: [field] })]
+    })
+
+    expect(entries).toHaveLength(1)
+    expect(entries[0]?.title).toBe('Voice Gate')
+    expect(entries[0]?.children).toEqual([])
   })
 
   // Review of #133182: a desktop plugin may pick ANY id, so `agent` + page
