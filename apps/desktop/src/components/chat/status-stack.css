@@ -63,6 +63,22 @@
   margin-top: -0.125rem;
 }
 
+/* A row that leads with its actions puts the cluster in front of the content: the
+   action column takes only the width the buttons need, so a row carrying no
+   controls keeps its text where every other row's text starts. */
+[data-slot='composer-status-stack'] .status-row[data-status-actions='leading'] {
+  grid-template-columns: var(--status-action-width) var(--status-icon-width) auto minmax(0, 1fr);
+}
+
+[data-slot='composer-status-stack'] .status-row[data-status-actions='leading'] .status-row-actions {
+  grid-column: 3;
+  justify-content: flex-start;
+}
+
+[data-slot='composer-status-stack'] .status-row[data-status-actions='leading'] .status-row-content {
+  grid-column: 4;
+}
+
 [data-slot='composer-status-stack'] .status-section-icon {
   width: var(--status-icon-width);
   justify-content: center;

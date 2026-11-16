@@ -93,6 +93,7 @@ export function QueuePanel({
 
     return (
       <StatusRow
+        actionsFirst
         className={cn(
           isEditing &&
             'ring-1 ring-inset ring-[color-mix(in_srgb,var(--dt-composer-ring)_40%,transparent)] bg-accent/25'

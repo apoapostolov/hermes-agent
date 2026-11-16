@@ -22,6 +22,12 @@ interface StatusRowProps {
   /** Right-aligned actions. Revealed on row hover/focus unless `trailingVisible`. */
   trailing?: ReactNode
   trailingVisible?: boolean
+  /** Draw the actions cluster before the content instead of after it, and keep it
+   *  visible (dimmed) while the row is at rest. For rows whose controls act on the
+   *  content itself — a queued prompt you can still edit — trailing hover-only
+   *  controls sit past the end of a long line. Background and subagent rows keep
+   *  the trailing reveal. */
+  actionsFirst?: boolean
   /** Forwarded to the row's root — lets a wrapper (e.g. a context-menu trigger
    *  using `asChild`) attach `ref` / `onContextMenu` to the real DOM node. */
   ref?: Ref<HTMLDivElement>
@@ -34,6 +40,7 @@ interface StatusRowProps {
  * with the first text line; section nesting and row padding share one CSS grid.
  */
 export function StatusRow({
+  actionsFirst = false,
   children,
   className,
   depth = 0,
@@ -46,6 +53,22 @@ export function StatusRow({
   trailing,
   trailingVisible = false
 }: StatusRowProps) {
+  const actions = trailing && (
+    <div
+      className={cn(
+        'status-row-actions flex shrink-0 items-center gap-0.5',
+        // A leading cluster advertises itself at rest; a trailing one waits for
+        // the row's hover, which is right for background and subagent rows.
+        !trailingVisible &&
+          (actionsFirst
+            ? 'opacity-60 group-hover/status-row:opacity-100 group-focus-within/status-row:opacity-100'
+            : 'opacity-0 group-hover/status-row:opacity-100 group-focus-within/status-row:opacity-100')
+      )}
+    >
+      {trailing}
+    </div>
+  )
+
   return (
     <div
       aria-expanded={expanded}
@@ -56,6 +79,7 @@ export function StatusRow({
         className
       )}
       data-slot="status-row"
+      data-status-actions={actionsFirst ? 'leading' : undefined}
       data-status-icon={leading !== undefined ? '' : undefined}
       onClick={onActivate}
       onContextMenu={onContextMenu}
@@ -82,17 +106,9 @@ export function StatusRow({
       {leading !== undefined && (
         <span className="status-row-icon flex size-3.5 shrink-0 items-center justify-center">{leading}</span>
       )}
+      {actionsFirst && actions}
       <div className="status-row-content flex min-w-0 flex-1 items-center gap-2">{children}</div>
-      {trailing && (
-        <div
-          className={cn(
-            'status-row-actions flex shrink-0 items-center gap-0.5',
-            !trailingVisible && 'opacity-0 group-hover/status-row:opacity-100 group-focus-within/status-row:opacity-100'
-          )}
-        >
-          {trailing}
-        </div>
-      )}
+      {!actionsFirst && actions}
     </div>
   )
 }

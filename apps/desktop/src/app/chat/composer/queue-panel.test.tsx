@@ -119,3 +119,23 @@ describe('QueuePanel lost turn', () => {
     expect(await screen.findByText('Turn lost during restart')).toBeTruthy()
   })
 })
+
+// #156548: on a long prompt the controls used to sit past the end of the preview and
+// only appeared on hover. They now lead the row and rest dimmed, so the row shows
+// what can be done to the prompt it carries.
+describe('QueuePanel row controls', () => {
+  it('draws the controls before a long preview, visible without hover', async () => {
+    const text = 'A'.repeat(200)
+    await renderExpandedPanel([entry('long', text)])
+
+    const preview = await screen.findByText(text)
+    const row = preview.closest<HTMLElement>('[data-slot="status-row"]')!
+    const actions = row.querySelector<HTMLElement>('.status-row-actions')!
+    const content = row.querySelector<HTMLElement>('.status-row-content')!
+
+    expect(row.getAttribute('data-status-actions')).toBe('leading')
+    expect(actions.nextElementSibling).toBe(content)
+    expect(content.contains(preview)).toBe(true)
+    expect(actions.className).not.toContain('opacity-0')
+  })
+})
