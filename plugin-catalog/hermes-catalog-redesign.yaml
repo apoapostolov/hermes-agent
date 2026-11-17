@@ -1,0 +1,21 @@
+name: hermes-catalog-redesign
+title: "Catalog Redesign"
+repo: https://github.com/apoapostolov/hermes-agent-awesome-plugins
+sha: 780d6ac605fb9bd161772f06e518728df3f1ea32
+subdir: public/catalog-redesign
+description: "Wide one-row-per-item catalog for skills, plugins, connectors and tools, with hover previews and a sliding detail panel. Disclosure: the catalog view fetches the published Hermes plugin and skill snapshots from nousresearch.github.io to populate its rows."
+maintainer: apoapostolov
+tier: community
+category: desktop
+docs_url: https://github.com/apoapostolov/hermes-agent-awesome-plugins/tree/main/public/catalog-redesign
+image: https://raw.githubusercontent.com/apoapostolov/hermes-agent-awesome-plugins/780d6ac605fb9bd161772f06e518728df3f1ea32/public/catalog-redesign/docs/hero.png
+screenshots:
+  - https://raw.githubusercontent.com/apoapostolov/hermes-agent-awesome-plugins/780d6ac605fb9bd161772f06e518728df3f1ea32/public/catalog-redesign/docs/screenshot-settings.png
+  - https://raw.githubusercontent.com/apoapostolov/hermes-agent-awesome-plugins/780d6ac605fb9bd161772f06e518728df3f1ea32/public/catalog-redesign/docs/screenshot.png
+version: "1.0.11"
+platforms: []
+capabilities:
+  provides_tools: []
+  provides_hooks: []
+  provides_middleware: []
+  requires_env: []
