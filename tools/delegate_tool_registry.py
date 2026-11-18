@@ -237,7 +237,7 @@ def _is_descendant_of(child_agent: Any, parent_agent: Any, max_hops: int = 8) ->
 
 # Model-facing control actions accepted by delegate_task(action=...).
 # "spawn" (or omitted) keeps the historical spawn semantics.
-_CONTROL_ACTIONS = frozenset({"list", "steer", "stop"})
+_CONTROL_ACTIONS = frozenset({"list", "steer", "stop", "answer"})
 
 def _resolve_session_lineage(session_id: Optional[str], parent_agent: Any) -> str:
     """Tip of a session id's compression lineage via the parent's storage handle (best-effort; input unchanged when
@@ -279,6 +279,16 @@ def _owns_subagent_record(record: dict[str, Any], parent_agent: Any) -> bool:
     tips = {parent_sid, _resolve_session_lineage(parent_sid, parent_agent)}
     return any(_resolve_session_lineage(owner_sid, parent_agent) in tips for owner_sid in owners)
 
+def _pending_question_id(subagent_id: Any) -> Optional[str]:
+    """The child's waiting question id, if it is parked on ask_parent right now."""
+    try:
+        from tools.subagent_question_tool import pending_questions
+    except Exception:  # the question tool is optional in a minimal install
+        return None
+    questions = pending_questions(str(subagent_id or ""))
+    return questions[0].question_id if questions else None
+
+
 def _list_payload(parent_agent: Any) -> dict[str, Any]:
     with _active_subagents_lock:
         records = list(_active_subagents.values())
@@ -296,6 +306,9 @@ def _list_payload(parent_agent: Any) -> dict[str, Any]:
             "running_seconds": round(time.time() - started, 1) if isinstance(started, (int, float)) else None,
             "accepting_steer": bool(r.get("accepting_steer", False)),
             "live_transcript": getattr(r.get("agent"), "_live_transcript_path", None),
+            # Present only while the child is parked on ask_parent: the parent needs this id to
+            # answer a question whose message it scrolled past.
+            "pending_question": _pending_question_id(r.get("subagent_id")),
         })
     from tools.delegate_tool_auto_resume import waiting_entries
     live = {e["subagent_id"] for e in entries}
@@ -309,11 +322,17 @@ def _list_payload(parent_agent: Any) -> dict[str, Any]:
         )
     return payload
 
-def _handle_control_action(action: str, subagent_id: Optional[str], message: Optional[str], parent_agent: Any) -> str:
-    """Synchronous control plane for delegate_task: list/steer/stop. Runs in-turn (never backgrounded) over the same
-    registry the TUI overlay drives, scoped so a conversation can only control its own spawn tree."""
+def _handle_control_action(
+    action: str, subagent_id: Optional[str], message: Optional[str], parent_agent: Any,
+    question_id: Optional[str] = None,
+) -> str:
+    """Synchronous control plane for delegate_task: list/steer/stop/answer. Runs in-turn (never backgrounded) over
+    the same registry the TUI overlay drives, scoped so a conversation can only control its own spawn tree."""
     if action == "list":
         return json.dumps(_list_payload(parent_agent), ensure_ascii=False)
+    if action == "answer":
+        from tools.subagent_question_tool import answer_pending_question
+        return answer_pending_question(subagent_id, question_id, message, parent_agent)
 
     # steer / stop need a resolvable, owned target.
     sid = (subagent_id or "").strip()

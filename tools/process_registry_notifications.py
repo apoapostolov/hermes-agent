@@ -559,6 +559,31 @@ def _format_subagent_message(evt: dict) -> str:
     )
 
 
+def _format_subagent_question(evt: dict) -> str:
+    """A child parked on a decision (``ask_parent``). Unlike a message this one is a request: the
+    child is not working while it waits, so silence costs the run rather than merely postponing a
+    report. Names the deadline and the exact verb, so answering takes no lookup."""
+    sid = evt.get("subagent_id") or "unknown"
+    qid = evt.get("question_id") or ""
+    goal = " ".join(str(evt.get("goal") or "").split())
+    goal_text = f' (goal: "{goal[:120]}")' if goal else ""
+    options = [str(o).strip() for o in (evt.get("options") or []) if str(o).strip()]
+    option_text = f"\nOptions: {' / '.join(options)}" if options else ""
+    deadline = evt.get("timeout_at")
+    if isinstance(deadline, (int, float)) and deadline > 0:
+        remaining = max(0, int(deadline - time.time()))
+        clock = time.strftime("%H:%M", time.localtime(deadline))
+        deadline_text = f"\nIt gives up at {clock} (in about {max(1, round(remaining / 60))} minutes)."
+    else:
+        deadline_text = ""
+    return (
+        f"[Subagent question from {sid}{goal_text}. It is PARKED and cannot continue until you answer.\n"
+        f"{str(evt.get('text') or '').strip()}{option_text}\n"
+        f"Answer with delegate_task(action='answer', subagent_id='{sid}', question_id='{qid}', "
+        f"message='...') once the user has decided.{deadline_text}]"
+    )
+
+
 def format_process_notification(evt: dict) -> str | None:
     """Format a completion_queue event into an ``[IMPORTANT: ...]`` message."""
     evt_type = evt.get("type", "completion")
@@ -571,6 +596,8 @@ def format_process_notification(evt: dict) -> str | None:
         return _format_async_delegation(evt)
     if evt_type == "subagent_message":
         return _format_subagent_message(evt)
+    if evt_type == "subagent_question":
+        return _format_subagent_question(evt)
     _sid, _cmd = evt.get("session_id", "unknown"), evt.get("command", "unknown")
     _attribution = _delegation_attribution_line(evt)
     if evt.get("handoff_note"):

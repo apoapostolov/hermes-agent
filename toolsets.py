@@ -154,8 +154,9 @@ TOOLSETS = {
     # session enables it — ``delegate_tool_toolsets`` role-grants it to every child — so a
     # top-level agent never advertises a tool it cannot legitimately use.
     "subagent_comms": _ts(
-        "Message the parent agent from the middle of a delegated run (subagents only)",
-        ["report_to_parent"],
+        "Message the parent agent, or ask it a question and wait, from the middle of a delegated "
+        "run (subagents only)",
+        ["report_to_parent", "ask_parent"],
     ),
     "kanban": _ts(
         "Kanban multi-agent coordination — only active when the agent is spawned by "

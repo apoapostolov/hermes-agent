@@ -615,7 +615,7 @@ def delegate_task(
     max_iterations: Optional[int] = None, role: Optional[str] = None, background: Optional[bool] = None,
     output_schema: Optional[dict[str, Any]] = None, images: Optional[list[str]] = None, action: Optional[str] = None,
     subagent_id: Optional[str] = None, message: Optional[str] = None, parent_agent=None,
-    credentials_cfg: Optional[dict[str, Any]] = None,
+    credentials_cfg: Optional[dict[str, Any]] = None, question_id: Optional[str] = None,
 ) -> str:
     """Spawn child agents (single ``goal`` or ``tasks=[...]`` batch) or control running ones. ``action``
     list/steer/stop run synchronously and bypass the pause gate, depth limit and async dispatch. ``role`` is legacy
@@ -632,9 +632,9 @@ def delegate_task(
         from tools.delegate_tool_continue import continue_subagent
         return continue_subagent(subagent_id, message, parent_agent, background=is_truthy_value(background, default=False))
     if normalized_action in _CONTROL_ACTIONS:
-        return _handle_control_action(normalized_action, subagent_id, message, parent_agent)
+        return _handle_control_action(normalized_action, subagent_id, message, parent_agent, question_id)
     if normalized_action and normalized_action != "spawn":
-        return tool_error(f"Unknown action '{action}'. Use spawn (default), list, steer, stop, or continue.")
+        return tool_error(f"Unknown action '{action}'. Use spawn (default), list, steer, stop, continue, or answer.")
 
     # Operator kill switch (TUI / delegation.pause RPC): blocks NEW spawns only.
     if is_spawn_paused():
@@ -911,14 +911,22 @@ DELEGATE_TASK_SCHEMA = {
             "action": _p(
                 "string",
                 "Default 'spawn'. Live control of running children: "
-                "'list' = ids/goals/status/transcripts; 'steer' = queue "
+                "'list' = ids/goals/status/transcripts (and any question a child is parked on); "
+                "'steer' = queue "
                 "course-correction text into one child without stopping it; 'stop' = end one child "
                 "early (partial result still returns); 'continue' = give a FINISHED child a follow-up: "
-                "it resumes its own conversation and returns like a spawn. "
+                "it resumes its own conversation and returns like a spawn; 'answer' = resolve a "
+                "question a child asked with ask_parent: it is parked until you do, and `message` is "
+                "the decision it receives. "
                 "Control actions return immediately; tasks are ignored unless spawning.",
-                enum=["spawn", "list", "steer", "stop", "continue"],
+                enum=["spawn", "list", "steer", "stop", "continue", "answer"],
             ),
-            "subagent_id": _p("string", "Required for action='steer'/'stop'/'continue' (ids from the spawn response or action='list')."),
+            "subagent_id": _p("string", "Required for action='steer'/'stop'/'continue'/'answer' (ids from the spawn response or action='list')."),
+            "question_id": _p(
+                "string",
+                "For action='answer': which question to resolve, from the question message or "
+                "action='list' (pending_question). Omit when the child has only one question waiting.",
+            ),
             "message": _p(
                 "string",
                 "Required for action='steer': the course correction, appended to "
