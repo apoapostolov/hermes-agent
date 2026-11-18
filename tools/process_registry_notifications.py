@@ -542,6 +542,23 @@ def _completion_status(evt: dict) -> str:
     return _REASON_STATUS.get(reason) or ("completed normally" if evt.get("exit_code", "?") == 0 else "exited")
 
 
+def _format_subagent_message(evt: dict) -> str:
+    """Mid-run message from a delegated child (``report_to_parent``). Names who sent it, what it
+    was sent to do, and the two ways to act, so an agent deep in unrelated work can route it
+    without re-reading the spawn. Unlike a completion this asks nothing of the parent by default:
+    the child is still running and its silence is not the same as having stopped."""
+    sid = evt.get("subagent_id") or "unknown"
+    kind = evt.get("kind") or "progress"
+    goal = " ".join(str(evt.get("goal") or "").split())
+    goal_text = f' (goal: "{goal[:120]}")' if goal else ""
+    return (
+        f"[Subagent message from {sid}{goal_text}, sent mid-run as a {kind}. It is still working.\n"
+        f"{str(evt.get('text') or '').strip()}\n"
+        f"Nothing is required to keep it alive. To answer it, delegate_task(action='steer', "
+        f"subagent_id='{sid}', message='...'); to end it early, action='stop'.]"
+    )
+
+
 def format_process_notification(evt: dict) -> str | None:
     """Format a completion_queue event into an ``[IMPORTANT: ...]`` message."""
     evt_type = evt.get("type", "completion")
@@ -552,6 +569,8 @@ def format_process_notification(evt: dict) -> str | None:
         return f"[IMPORTANT: {evt.get('message', '')}]"
     if evt_type == "async_delegation":
         return _format_async_delegation(evt)
+    if evt_type == "subagent_message":
+        return _format_subagent_message(evt)
     _sid, _cmd = evt.get("session_id", "unknown"), evt.get("command", "unknown")
     _attribution = _delegation_attribution_line(evt)
     if evt.get("handoff_note"):

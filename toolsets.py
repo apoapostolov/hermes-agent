@@ -150,6 +150,13 @@ TOOLSETS = {
     "clarify": _ts("Ask the user clarifying questions (multiple-choice or open-ended)", ["clarify"]),
     "code_execution": _ts("Run Python scripts that call tools programmatically (reduces LLM round trips)", ["execute_code"]),
     "delegation": _ts("Spawn subagents with isolated context for complex subtasks", ["delegate_task"]),
+    # Children only: the one channel a subagent has back to its parent mid-run. No interactive
+    # session enables it — ``delegate_tool_toolsets`` role-grants it to every child — so a
+    # top-level agent never advertises a tool it cannot legitimately use.
+    "subagent_comms": _ts(
+        "Message the parent agent from the middle of a delegated run (subagents only)",
+        ["report_to_parent"],
+    ),
     "kanban": _ts(
         "Kanban multi-agent coordination — only active when the agent is spawned by "
         "the kanban dispatcher (HERMES_KANBAN_TASK env set). The dispatcher runs "

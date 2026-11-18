@@ -113,6 +113,12 @@ def _resolve_child_toolsets(
     inherited_disabled = (
         [str(name) for name in raw_parent_disabled] if isinstance(raw_parent_disabled, (list, tuple, set)) else []
     )
+    # Every child gets the mid-run channel back to this thread (``report_to_parent``), granted by
+    # role like the orchestrator's delegation below: no interactive session enables it, and it is
+    # the child's only way to say something before it finishes. Nested children get it too, each
+    # addressing its own parent.
+    if "subagent_comms" not in child_toolsets:
+        child_toolsets.append("subagent_comms")
     if effective_role == "orchestrator":
         inherited_disabled = [name for name in inherited_disabled if name != "delegation"]
         if "delegation" not in child_toolsets:
