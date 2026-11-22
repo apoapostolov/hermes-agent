@@ -1,0 +1,18 @@
+{
+  "worktree": {
+    "setup": [
+      "if (Test-Path 'C:/git-ext/hermes-agent/.venv/Scripts/python.exe') { & 'C:/git-ext/hermes-agent/.venv/Scripts/python.exe' --version } else { Write-Warning 'hermes-agent .venv missing: skill and plugin checks will fail until the main checkout has one' }"
+    ]
+  },
+  "scripts": {
+    "skills-standards": {
+      "command": "\"C:\\git-ext\\hermes-agent\\.venv\\Scripts\\python.exe\" -m pytest tests\\skills\\test_authoring_standards.py -q"
+    },
+    "skills-tests": {
+      "command": "\"C:\\git-ext\\hermes-agent\\.venv\\Scripts\\python.exe\" -m pytest tests\\skills -q"
+    },
+    "plugin-catalog-check": {
+      "command": "\"C:\\git-ext\\hermes-agent\\.venv\\Scripts\\python.exe\" scripts\\validate_plugin_catalog.py plugin-catalog\\"
+    }
+  }
+}
